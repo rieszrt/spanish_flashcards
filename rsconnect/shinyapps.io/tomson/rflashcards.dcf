@@ -1,0 +1,11 @@
+name: rflashcards
+title:
+username:
+account: tomson
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4635992
+bundleId: 5024931
+url: https://tomson.shinyapps.io/rflashcards/
+when: 1631454913.16043
+lastSyncTime: 1631454913.16044
