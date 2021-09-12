@@ -8,7 +8,9 @@
 #
 
 library(shiny)
-source('vocab.R')
+library(DT)
+
+vocab<-read.csv("vocab.csv")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -19,22 +21,17 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("questions",
-                        "Number of Questions:",
-                        min = 5,
-                        max = 100,
-                        value = 20),
-            selectInput("category", "Category Selection:",names(vocab)),
+            selectInput("category", "Category Selection:",unique(vocab$category)),
+            selectInput("test_language", "Test Language:",c("esp","eng")),
             actionButton("start_test", "Start Test"),
             actionButton("next_word","Next Word"),
+            actionButton("show_translation","Show Translation"),
             htmlOutput("word_display")
-            
-
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+            DTOutput('myTable'),
         )
     )
 )
@@ -45,19 +42,37 @@ server <- function(input, output) {
     words<-reactiveVal()
     
     observeEvent(input$start_test,{
-        words(sample(vocab[[input$category]]))
+        category_words = vocab[which(vocab$category==input$category),]
+        words(category_words[sample(nrow(category_words)),])
         print(words())
         word_index(1)
     })
     
     observeEvent(input$next_word,{
-        print("next word")
-        word<-words()[word_index()]
+        word<-words()[word_index(),input$test_language]
         print(word)
         word_index(word_index()+1)
         output$word_display <- renderText({
             c("<p><b>","Word: ","</b>",word,"</p>")
         })
+    })
+    observeEvent(input$show_translation,{
+        if (input$test_language=="eng"){
+            other_language <-"esp"
+        } else{
+            other_language<-"eng"
+        }
+        word<-words()[word_index()-1,other_language]
+        print(word)
+        output$word_display <- renderText({
+            c("<p><b>","Word: ","</b>",word,"</p>")
+        })
+    })
+    
+    output$myTable <- renderDT({
+        print("mytable")
+        words()
+        
     })
     
 }
